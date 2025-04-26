@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Indian Monuments Quiz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f9f6f2;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .quiz-container {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+      max-width: 700px;
+      width: 100%;
+      text-align: center;
+    }
+    .question {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .options label {
+      display: block;
+      margin: 0.5rem 0;
+      padding: 0.8rem;
+      background-color: #f1f1f1;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .options label:hover {
+      background-color: #ddd;
+    }
+    .options input {
+      display: none;
+    }
+    button {
+      margin-top: 1rem;
+      padding: 0.75rem 1.5rem;
+      background-color: #d67f38;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #c46e28;
+    }
+    .timer {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      color: #d14334;
+    }
+    .result {
+      font-size: 1.5rem;
+      margin-top: 2rem;
+      font-weight: 600;
+    }
+    .leaderboard {
+      margin-top: 2rem;
+      text-align: left;
+    }
+    .leaderboard h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+    .leaderboard ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    .leaderboard li {
+      padding: 0.5rem;
+      background-color: #eee;
+      border-radius: 8px;
+      margin-bottom: 0.3rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="timer" id="timer">Time left: 30</div>
+    <div id="quiz">
+      <div class="question" id="question">Loading...</div>
+      <div class="options" id="options"></div>
+      <button onclick="nextQuestion()">Next</button>
+    </div>
+    <div id="result" class="result" style="display: none;"></div>
+    <div class="leaderboard" id="leaderboard" style="display: none;">
+      <h3>Leaderboard</h3>
+      <ul id="scoreList"></ul>
+    </div>
+  </div>
+
+  <script>
+    const quizData = [
+      { question: "Where is the Taj Mahal located?", options: ["Delhi", "Agra", "Jaipur", "Mumbai"], answer: "Agra" },
+      { question: "Which monument served as the residence of Mughal emperors?", options: ["Red Fort", "Ajanta Caves", "Konark Temple", "Gateway of India"], answer: "Red Fort" },
+      { question: "The Hawa Mahal is known for its:", options: ["Giant domes", "Sculpted elephants", "Hundreds of windows", "Underground passages"], answer: "Hundreds of windows" },
+      { question: "Ajanta and Ellora Caves are famous for:", options: ["Mughal paintings", "Buddhist carvings", "Hindu scriptures", "Ancient weaponry"], answer: "Buddhist carvings" },
+      { question: "Konark Sun Temple is shaped like:", options: ["A mountain", "A chariot", "A palace", "A temple dome"], answer: "A chariot" },
+      { question: "Where is Hawa Mahal located?", options: ["Jodhpur", "Udaipur", "Jaipur", "Bikaner"], answer: "Jaipur" },
+      { question: "The Ajanta caves are mainly associated with which religion?", options: ["Hinduism", "Jainism", "Christianity", "Buddhism"], answer: "Buddhism" },
+      { question: "Which Indian monument is a UNESCO World Heritage Site and located in Maharashtra?", options: ["Qutub Minar", "Ajanta Caves", "Charminar", "India Gate"], answer: "Ajanta Caves" },
+      { question: "What does the name 'Hawa Mahal' mean?", options: ["Palace of Winds", "House of Clouds", "Royal Retreat", "Golden Pavilion"], answer: "Palace of Winds" },
+      { question: "Red Fort was constructed during the reign of:", options: ["Babur", "Shah Jahan", "Akbar", "Aurangzeb"], answer: "Shah Jahan" }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let timer;
+    let timeLeft = 30;
+
+    function loadQuestion() {
+      const q = quizData[currentQuestion];
+      document.getElementById("question").textContent = `${currentQuestion + 1}. ${q.question}`;
+      const options = document.getElementById("options");
+      options.innerHTML = "";
+      q.options.forEach(opt => {
+        const label = document.createElement("label");
+        label.innerHTML = `<input type='radio' name='option' value='${opt}'> ${opt}`;
+        options.appendChild(label);
+      });
+      resetTimer();
+    }
+
+    function resetTimer() {
+      clearInterval(timer);
+      timeLeft = 30;
+      document.getElementById("timer").textContent = `Time left: ${timeLeft}`;
+      timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").textContent = `Time left: ${timeLeft}`;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          nextQuestion();
+        }
+      }, 1000);
+    }
+
+    function nextQuestion() {
+      clearInterval(timer);
+      const selected = document.querySelector('input[name="option"]:checked');
+      if (selected && selected.value === quizData[currentQuestion].answer) {
+        score++;
+      }
+      currentQuestion++;
+      if (currentQuestion < quizData.length) {
+        loadQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      document.getElementById("quiz").style.display = "none";
+      document.getElementById("timer").style.display = "none";
+      document.getElementById("result").style.display = "block";
+      document.getElementById("result").textContent = `You scored ${score} out of ${quizData.length}.`;
+      updateLeaderboard(score);
+    }
+
+    function updateLeaderboard(score) {
+      const name = prompt("Enter your name for the leaderboard:") || "Anonymous";
+      const scores = JSON.parse(localStorage.getItem("leaderboardScores")) || [];
+      scores.push({ name, score });
+      scores.sort((a, b) => b.score - a.score);
+      scores.splice(5);
+      localStorage.setItem("leaderboardScores", JSON.stringify(scores));
+      displayLeaderboard(scores);
+    }
+
+    function displayLeaderboard(scores) {
+      document.getElementById("leaderboard").style.display = "block";
+      const list = document.getElementById("scoreList");
+      list.innerHTML = "";
+      scores.forEach(s => {
+        const li = document.createElement("li");
+        li.textContent = `${s.name} - ${s.score}`;
+        list.appendChild(li);
+      });
+    }
+
+    loadQuestion();
+  </script>
+</body>
+</html>
